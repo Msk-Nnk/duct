@@ -151,9 +151,9 @@
                 s2 = getShinsaki(90);
             }
 
-            // 4. 単管長さ
+            // 4. 単管長さ (0以下でもそのまま表示するため Math.max制限を解除)
             let pipeLength = Math.floor(L - (s1 + s2));
-            if (pipeLength < 0 || isNaN(pipeLength)) pipeLength = 0;
+            if (isNaN(pipeLength)) pipeLength = 0;
 
             // 5. 水平距離の算出
             let h_himo_himo = "-";
@@ -179,8 +179,17 @@
             const pipeEl = document.getElementById('res-pipe');
             pipeEl.innerText = pipeLength;
 
-            // 視覚的フィードバック
-            if (H > 0 || (angleType === "90-90" && diameter > 0)) {
+            // 文字色でアラートを表現 (マイナスの場合は赤っぽくする)
+            if (pipeLength <= 0) {
+                pipeEl.parentElement.classList.add('text-red-500');
+                pipeEl.parentElement.classList.remove('text-blue-700');
+            } else {
+                pipeEl.parentElement.classList.add('text-blue-700');
+                pipeEl.parentElement.classList.remove('text-red-500');
+            }
+
+            // 視覚的フィードバック (入力がある場合のみ表示を濃くする)
+            if (vert > 0 || horiz > 0 || (angleType === "90-90" && diameter > 0)) {
                 pipeEl.parentElement.parentElement.classList.remove('opacity-20');
             } else {
                 pipeEl.parentElement.parentElement.classList.add('opacity-20');
