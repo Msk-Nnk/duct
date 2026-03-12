@@ -76,16 +76,10 @@
                     </div>
                 </div>
 
-                <!-- Detail Results: Offset & Center-to-Center -->
-                <div class="grid grid-cols-2 gap-4 border-b border-blue-200 pb-4">
-                    <div class="text-center">
-                        <p class="text-[10px] font-bold text-blue-400 uppercase tracking-tighter">合成振れ</p>
-                        <p class="text-lg font-bold text-slate-700"><span id="res-h"></span> <span id="unit-h" class="text-xs text-slate-500 hidden">mm</span></p>
-                    </div>
-                    <div class="text-center border-l border-blue-200">
-                        <p class="text-[10px] font-bold text-blue-400 uppercase tracking-tighter">芯々距離</p>
-                        <p class="text-lg font-bold text-slate-700"><span id="res-l"></span> <span id="unit-l" class="text-xs text-slate-500 hidden">mm</span></p>
-                    </div>
+                <!-- Detail Results: Offset Only -->
+                <div class="text-center border-b border-blue-200 pb-4">
+                    <p class="text-[10px] font-bold text-blue-400 uppercase tracking-tighter">合成振れ</p>
+                    <p class="text-lg font-bold text-slate-700"><span id="res-h"></span> <span id="unit-h" class="text-xs text-slate-500 hidden">mm</span></p>
                 </div>
 
                 <!-- Horizontal Distance Results -->
@@ -122,17 +116,15 @@
             
             const resPipe = document.getElementById('res-pipe');
             const resH = document.getElementById('res-h');
-            const resL = document.getElementById('res-l');
             const resHimoHimo = document.getElementById('res-himo-himo');
             const resHimoShin = document.getElementById('res-himo-shin');
 
-            const units = ['unit-pipe', 'unit-h', 'unit-l', 'unit-himo1', 'unit-himo2'];
+            const units = ['unit-pipe', 'unit-h', 'unit-himo1', 'unit-himo2'];
 
-            // どの角度であっても、入力（縦・横の両方）が空ならブランクにする
+            // 入力がない場合はブランクにする
             if (vVal === "" && hVal === "") {
                 resPipe.innerText = "";
                 resH.innerText = "";
-                resL.innerText = "";
                 resHimoHimo.innerText = "";
                 resHimoShin.innerText = "";
                 units.forEach(id => document.getElementById(id).classList.add('hidden'));
@@ -145,23 +137,18 @@
             const vert = parseFloat(vVal) || 0;
             const horiz = parseFloat(hVal) || 0;
 
-            // 1. 合成振れ (三平方の定理)
+            // 1. 合成振れ
             const H = Math.sqrt(Math.pow(vert, 2) + Math.pow(horiz, 2));
 
-            // 2. 芯々距離 (L)
+            // 2. 芯々距離 (計算には必要)
             let effectiveAngle = 45; 
             if (angleType === "90-90") effectiveAngle = 90;
-
             const rad = effectiveAngle * (Math.PI / 180);
             let L = (effectiveAngle === 90) ? H : H / Math.sin(rad);
 
-            // 3. 芯先寸法 (R=1.0D)
+            // 3. 芯先寸法
             const tan225 = Math.tan(22.5 * Math.PI / 180);
-
-            const getShinsaki = (angle) => {
-                if (angle === 90) return diameter;
-                return diameter * tan225;
-            };
+            const getShinsaki = (angle) => (angle === 90) ? diameter : diameter * tan225;
 
             let s1 = 0, s2 = 0;
             if (angleType === "45-45") {
@@ -190,12 +177,11 @@
             } else if (angleType === "45-90") {
                 h_himo_himo = "-";
                 h_himo_shin = Math.floor(H + s1);
-                document.getElementById('unit-himo1').classList.add('hidden'); // ハイフンの時は単位を隠す
+                document.getElementById('unit-himo1').classList.add('hidden');
             }
 
             // UI Update
             resH.innerText = H.toFixed(1);
-            resL.innerText = L.toFixed(1);
             resHimoHimo.innerText = h_himo_himo;
             resHimoShin.innerText = h_himo_shin;
             resPipe.innerText = pipeLength;
@@ -210,10 +196,6 @@
                 pipeContainer.classList.remove('text-red-500');
             }
         }
-
-        window.onload = function() {
-            // 初期化
-        };
     </script>
 </body>
 </html>
