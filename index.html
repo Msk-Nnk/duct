@@ -56,22 +56,22 @@
             <div class="space-y-4">
                 <div class="space-y-2">
                     <label class="block text-sm font-bold text-slate-700">縦フレ寸法 (mm)</label>
-                    <input type="number" id="vert" oninput="calculate()" placeholder="0" class="w-full bg-slate-50 border-2 border-slate-200 p-4 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-lg font-semibold text-slate-800 transition-all placeholder-slate-300">
+                    <input type="number" id="vert" oninput="calculate()" placeholder="入力してください" class="w-full bg-slate-50 border-2 border-slate-200 p-4 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-lg font-semibold text-slate-800 transition-all placeholder-slate-300">
                 </div>
                 <div class="space-y-2">
                     <label class="block text-sm font-bold text-slate-700">横フレ寸法 (mm)</label>
-                    <input type="number" id="horiz" oninput="calculate()" placeholder="0" class="w-full bg-slate-50 border-2 border-slate-200 p-4 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-lg font-semibold text-slate-800 transition-all placeholder-slate-300">
+                    <input type="number" id="horiz" oninput="calculate()" placeholder="入力してください" class="w-full bg-slate-50 border-2 border-slate-200 p-4 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-lg font-semibold text-slate-800 transition-all placeholder-slate-300">
                 </div>
             </div>
 
             <!-- Results Section -->
-            <div class="bg-blue-50 rounded-2xl p-6 border border-blue-100 shadow-inner mt-4 space-y-4">
+            <div id="result-container" class="bg-blue-50 rounded-2xl p-6 border border-blue-100 shadow-inner mt-4 space-y-4">
                 
                 <!-- Main Result: Pipe Length -->
                 <div class="text-center pb-4 border-b border-blue-200">
                     <p class="text-sm font-bold text-blue-600 mb-1 tracking-wider">カットする単管長さ</p>
                     <div class="flex items-baseline justify-center text-blue-700">
-                        <span id="res-pipe" class="text-7xl font-black transition-all">0</span>
+                        <span id="res-pipe" class="text-7xl font-black transition-all"></span>
                         <span class="text-2xl font-bold ml-2">mm</span>
                     </div>
                 </div>
@@ -80,11 +80,11 @@
                 <div class="grid grid-cols-2 gap-4 border-b border-blue-200 pb-4">
                     <div class="text-center">
                         <p class="text-[10px] font-bold text-blue-400 uppercase tracking-tighter">合成振れ</p>
-                        <p class="text-lg font-bold text-slate-700"><span id="res-h">0.0</span> <span class="text-xs text-slate-500">mm</span></p>
+                        <p class="text-lg font-bold text-slate-700"><span id="res-h"></span> <span id="unit-h" class="text-xs text-slate-500 hidden">mm</span></p>
                     </div>
                     <div class="text-center border-l border-blue-200">
                         <p class="text-[10px] font-bold text-blue-400 uppercase tracking-tighter">芯々距離</p>
-                        <p class="text-lg font-bold text-slate-700"><span id="res-l">0.0</span> <span class="text-xs text-slate-500">mm</span></p>
+                        <p class="text-lg font-bold text-slate-700"><span id="res-l"></span> <span id="unit-l" class="text-xs text-slate-500 hidden">mm</span></p>
                     </div>
                 </div>
 
@@ -92,11 +92,11 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div class="text-center">
                         <p class="text-[10px] font-bold text-blue-500 uppercase tracking-tighter">水平距離(ヒモ-ヒモ)</p>
-                        <p class="text-md font-bold text-slate-700 leading-tight"><span id="res-himo-himo">0</span> <span class="text-xs text-slate-400 font-normal">mm</span></p>
+                        <p class="text-md font-bold text-slate-700 leading-tight"><span id="res-himo-himo"></span> <span id="unit-himo1" class="text-xs text-slate-400 font-normal hidden">mm</span></p>
                     </div>
                     <div class="text-center border-l border-blue-200">
                         <p class="text-[10px] font-bold text-blue-500 uppercase tracking-tighter">水平距離(ヒモ-芯)</p>
-                        <p class="text-md font-bold text-slate-700 leading-tight"><span id="res-himo-shin">0</span> <span class="text-xs text-slate-400 font-normal">mm</span></p>
+                        <p class="text-md font-bold text-slate-700 leading-tight"><span id="res-himo-shin"></span> <span id="unit-himo2" class="text-xs text-slate-400 font-normal hidden">mm</span></p>
                     </div>
                 </div>
             </div>
@@ -117,8 +117,33 @@
         function calculate() {
             const angleType = document.getElementById('angleType').value;
             const diameter = parseFloat(document.getElementById('diameter').value);
-            const vert = parseFloat(document.getElementById('vert').value) || 0;
-            const horiz = parseFloat(document.getElementById('horiz').value) || 0;
+            const vVal = document.getElementById('vert').value;
+            const hVal = document.getElementById('horiz').value;
+            
+            const resPipe = document.getElementById('res-pipe');
+            const resH = document.getElementById('res-h');
+            const resL = document.getElementById('res-l');
+            const resHimoHimo = document.getElementById('res-himo-himo');
+            const resHimoShin = document.getElementById('res-himo-shin');
+
+            const units = ['unit-h', 'unit-l', 'unit-himo1', 'unit-himo2'];
+
+            // 入力がない（90-90以外で）場合はブランクにする
+            if (vVal === "" && hVal === "" && angleType !== "90-90") {
+                resPipe.innerText = "";
+                resH.innerText = "";
+                resL.innerText = "";
+                resHimoHimo.innerText = "";
+                resHimoShin.innerText = "";
+                units.forEach(id => document.getElementById(id).classList.add('hidden'));
+                return;
+            }
+
+            // 単位を表示
+            units.forEach(id => document.getElementById(id).classList.remove('hidden'));
+
+            const vert = parseFloat(vVal) || 0;
+            const horiz = parseFloat(hVal) || 0;
 
             // 1. 合成振れ (三平方の定理)
             const H = Math.sqrt(Math.pow(vert, 2) + Math.pow(horiz, 2));
@@ -151,7 +176,7 @@
                 s2 = getShinsaki(90);
             }
 
-            // 4. 単管長さ (0以下でもそのまま表示するため Math.max制限を解除)
+            // 4. 単管長さ
             let pipeLength = Math.floor(L - (s1 + s2));
             if (isNaN(pipeLength)) pipeLength = 0;
 
@@ -168,35 +193,30 @@
             } else if (angleType === "45-90") {
                 h_himo_himo = "-";
                 h_himo_shin = Math.floor(H + s1);
+                document.getElementById('unit-himo1').classList.add('hidden'); // ハイフンの時は単位を隠す
             }
 
             // UI Update
-            document.getElementById('res-h').innerText = H.toFixed(1);
-            document.getElementById('res-l').innerText = L.toFixed(1);
-            document.getElementById('res-himo-himo').innerText = h_himo_himo;
-            document.getElementById('res-himo-shin').innerText = h_himo_shin;
-            
-            const pipeEl = document.getElementById('res-pipe');
-            pipeEl.innerText = pipeLength;
+            resH.innerText = H.toFixed(1);
+            resL.innerText = L.toFixed(1);
+            resHimoHimo.innerText = h_himo_himo;
+            resHimoShin.innerText = h_himo_shin;
+            resPipe.innerText = pipeLength;
 
-            // 文字色でアラートを表現 (マイナスの場合は赤っぽくする)
+            // 文字色でアラートを表現
+            const pipeContainer = resPipe.parentElement;
             if (pipeLength <= 0) {
-                pipeEl.parentElement.classList.add('text-red-500');
-                pipeEl.parentElement.classList.remove('text-blue-700');
+                pipeContainer.classList.add('text-red-500');
+                pipeContainer.classList.remove('text-blue-700');
             } else {
-                pipeEl.parentElement.classList.add('text-blue-700');
-                pipeEl.parentElement.classList.remove('text-red-500');
-            }
-
-            // 視覚的フィードバック (入力がある場合のみ表示を濃くする)
-            if (vert > 0 || horiz > 0 || (angleType === "90-90" && diameter > 0)) {
-                pipeEl.parentElement.parentElement.classList.remove('opacity-20');
-            } else {
-                pipeEl.parentElement.parentElement.classList.add('opacity-20');
+                pipeContainer.classList.add('text-blue-700');
+                pipeContainer.classList.remove('text-red-500');
             }
         }
 
-        window.onload = calculate;
+        window.onload = function() {
+            // 初期状態はブランク
+        };
     </script>
 </body>
 </html>
