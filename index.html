@@ -25,59 +25,6 @@
         }
     </style>
 </head>
-    <script>  
-  let deferredPrompt;
-
-// Android Chrome: 自動プロンプトイベントを捕捉
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  showPrompt(); // バナー表示
-});
-
-// 共通: 初回訪問時や条件でバナー表示
-function showPrompt() {
-  if (deferredPrompt) {
-    // カスタムバナーHTML（例）
-    const banner = document.createElement('div');
-    banner.innerHTML = `
-      <div style="position:fixed;bottom:0;left:0;right:0;background:#007AFF;color:white;padding:15px;text-align:center;z-index:10000;">
-        <p>アプリのようにホーム画面に追加しませんか？</p>
-        <button onclick="addToHomeScreen()">追加する</button>
-        <button onclick="closeBanner()">閉じる</button>
-      </div>`;
-    document.body.appendChild(banner);
-  } else {
-    // Safari: 手順ガイド
-    alert('Safari: 共有ボタン → ホーム画面に追加 をタップ！');
-  }
-}
-
-function addToHomeScreen() {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then((choice) => {
-      if (choice.outcome === 'accepted') console.log('追加されました');
-      deferredPrompt = null;
-    });
-  }
-  closeBanner();
-}
-
-function closeBanner() {
-  const banner = document.querySelector('div[style*="position:fixed"]');
-  if (banner) banner.remove();
-}
-
-// ページロード時にチェック（初回のみ）
-window.addEventListener('load', () => {
-  if (!localStorage.getItem('pwa-prompt-shown')) {
-    setTimeout(showPrompt, 3000); // 3秒後表示
-    localStorage.setItem('pwa-prompt-shown', 'true');
-  }
-});
-
-</script>
 <body class="bg-slate-100 min-h-screen flex items-center justify-center p-4">
     <div class="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
         <!-- Header -->
